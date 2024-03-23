@@ -1,3 +1,6 @@
 [submodule "report/diploma-latex-template"]
 	path = report/diploma-latex-template
 	url = https://github.com/iktovr/diploma-latex-template.git
+[submodule "OpenCV-Document-Scanner"]
+	path = OpenCV-Document-Scanner
+	url = https://github.com/Yadroff/OpenCV-Document-Scanner
