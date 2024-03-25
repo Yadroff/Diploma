@@ -11,71 +11,88 @@
 \label{neuro_model}
 \end{figure}
 
-Коррекция перспективы необходима для устранения шума на изображении и получения лучшего результата. Она состоит из нескольких этапов, представленных на рисунке ~\ref{perspective_correction}. 
+\subsection{Коррекция перспективы}
+
+Коррекция перспективы необходима для устранения шума на изображении и получения лучшего результата. Она состоит из нескольких этапов, представленных на рисунке ~\ref{perspective_correction_algo}. 
 Также на рисунке представлены результаты, получаемые на каждом из этапов обработки.
 
 \begin{figure}
     \includegraphics[scale=0.75]{img/perspective_correction}
     \caption{Этапы коррекции перспективы изображения}
-    \label{perspective_correction}
+    \label{perspective_correction_algo}
 \end{figure}
 
 На начальном этапе мы имеем изображение, показанное на рисунке ~\ref{input}
 
 \begin{figure}
-    \includegraphics[scale=0.25]{img/input}
+    \includegraphics[scale=0.15]{img/perspective/input}
     \caption{Начальное изображение}
     \label{input}
 \end{figure}
 
-Для начала необходимо удалить текст с изображения. Для этого несколько раз производится морфологическая операция закрытия с ядром $3\times3$. 
-После этого к изображению применяется алгоритм сегментации $GrabCut$ \cite{grab_cut}. На выходе данного этапа имеем изображение, представленное на рисунке ~\ref{grab_cut}
+Для начала необходимо удалить текст с изображения. Для этого преобразуем изображение в серый цвет и применим к нему размытие Гаусса \cite{gauss_blur}. На выходе данного этапа имеем изображение, представленное на рисунке ~\ref{gauss_blur}
 
 \begin{figure}
-    \includegraphics[scale=0.25]{img/grab_cut}
-    \caption{Изображение после сегментации алгоритмом $GrabCut$}
-    \label{grab_cut}
+    \includegraphics[scale=0.5]{img/perspective/blured.png}
+    \caption{Изображение после размытия Гаусса}
+    \label{gauss_blur}
 \end{figure}
 
-На следующем этапе необходимо выделить контуры на полученном изображении. Для этого изображение переводится в серый цвет, затем к нему применяется алгоритм Гауссовского размытия \cite{gauss_blur}. После этого применяется алгоритм поиска ребер Канни \cite{canny}.
-На выходе данного этапа имеем изображение, представленное на рисунке ~\ref{canny}
-
+Для поиска контуров необходимо выделить ребра. Для этого используется алгоритм Канни \cite{canny}. На выходе имеем изображение, представленное на рисунке ~\ref{canny}
 \begin{figure}
-    \includegraphics[scale=0.25]{img/edges}
+    \includegraphics[scale=0.5]{img/perspective/canny}
     \caption{Ребра, найденные на изображении}
     \label{canny}
 \end{figure}
 
-На этапе нахождения контуров берутся ребра, полученные на предыдущем этапе. Находим контуры с помощью алгоритма, встроенного в $openCV$ \cite{contours}. 
-Среди найденных контуров оставляем 5 контуров с наибольшей площадью. На выходе данного этапа имеем изображение, представленное на рисунке ~\ref{contours}
+После нахождения ребер поиск контуров осуществляется двумя способами:
+\begin{enumerate}
+    \item С помощью алгоритма $Line Segment Detector$ \cite{lsd}
+    \item С помощью встроенного в $openCV$ алгоритма поиска контуров \cite{opencv_contours}
+\end{enumerate}
 
+Опишем подробнее поиск контуров на основе найденных линий: после прохода алгоритма имеем изображение, представленное на рисунке ~\ref{lsd_img}
 \begin{figure}
-    \includegraphics[scale=0.25]{img/contours}
+    \includegraphics[scale=0.5]{img/perspective/lsd}
+    \caption{Найденные на изображении линии с помощью алгоритма $LSD$}
+    \label{lsd_img}
+\end{figure}
+
+Контур определяется как пересечение горизонтальных и вертикальных линий. На выходе имеем найденные углы контура, показанные на рисунке ~\ref{lsd_corners}
+\begin{figure}
+    \includegraphics[scale=0.5]{img/perspective/corners}
+    \caption{Найденные на изображении контуры на основе линий}
+    \label{lsd_corners}
+\end{figure}
+
+С помощью библиотеки $openCV$ контуры находятся следующим образом:
+
+\begin{enumerate}
+    \item Находятся 5 наибольших по площади контуров
+    \item Найденные контуры проверяются на количество углов, минимальную площадь контура
+\end{enumerate}
+
+Среди всех подходящих контуров выбирается наибольший по площади, как показано на рисунке ~\ref{contours}
+\begin{figure}
+    \includegraphics[scale=0.5]{img/perspective/contours}
     \caption{Найденные алгоритмом контуры}
     \label{contours}
 \end{figure}
 
-Теперь необходимо среди оставленных контуров найти координаты вершин прямоугольника (если такой есть). Для этого пытаемся аппроксимировать контур с помощью встроенной в $openCV$ \cite{opencv_approx} функции и найти прямоугольник.
-После определения прямоугольника сортируем вершины в нужном порядке:
-\begin{enumerate}[arabic]
-    \item Левая верхняя вершина
-    \item Правая нижняя вершина
-    \item Правая верхняя вершина
-    \item Левая нижняя вершина
-\end{enumerate}
 
-На выходе данного этапа имеем изображение, представленное на рисунке ~\ref{corners}
-
-\begin{figure}
-    \includegraphics[scale=0.25]{img/corners}
-    \caption{Найденные вершины прямоугольника}
-    \label{corners}
-\end{figure}
-
-На финальном этапе по имеющимся координатам прямоугольника, представляющего лист бумаги, осуществляем коррекцию перспективы. Для этого находим матрицу коррекции \cite{opencv_perspective_transform} и примянем ее к изображению \cite{opencv_warp_perspective}.
+На основе найденного контура, представляющего лист бумаги, осуществляем коррекцию перспективы. Для этого находим матрицу коррекции \cite{opencv_perspective_transform} и примянем ее к изображению \cite{opencv_warp_perspective}.
 Получаем результирующее изображение, показанное на рисунке ~\ref{perspective_correction}
 \begin{figure}
-    \includegraphics[scale=0.25]{img/perspective_output}
-    \caption{Результирующее изображение}
+    \includegraphics[scale=0.1]{img/perspective/perspective}
+    \caption{Изображение с коррекцией перспективы}
     \label{perspective_correction}
+\end{figure}
+
+Далее необходимо добавить эффект сканирования. Эффект достигается путем применения к композиции небольшого размытия и серого изображения алгоритма сегментации $Adaptive Threshold$ \cite{opencv_threshold}. 
+В конечном итоге имеем результирующее изображение показанное на рисунке ~\ref{preprocess_out}
+
+\begin{figure}
+    \includegraphics[scale=0.15]{img/perspective/output}
+    \caption{Результирующее изображение}
+    \label{preprocess_out}
 \end{figure}
