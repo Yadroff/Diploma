@@ -1,0 +1,105 @@
+\subsection{Коррекция перспективы}
+
+Коррекция перспективы необходима для устранения шума на изображении и получения лучшего результата. Она состоит из нескольких этапов, представленных на рисунке ~\ref{perspective_correction_algo}. 
+Также на рисунке представлены результаты, получаемые на каждом из этапов обработки.
+
+Стоит отметить, что коррекция перспективы осуществляется с использованием только алгоритмов обработки изображения без использования каких-либо нейросетей. 
+Поэтому в целях экономии ресурсов сервера, а в следствии улучшения производительности было принято решение выполнять данный этап на машине клиента.
+Схема данного алгоритма представлена на рисунке ~\ref{perspective_correction_algo}.
+\begin{figure}
+    \includegraphics[scale=0.75]{img/perspective_correction}
+    \caption{Этапы коррекции перспективы изображения}
+    \label{perspective_correction_algo}
+\end{figure}
+
+На начальном этапе мы имеем изображение, показанное на рисунке ~\ref{input}
+
+\begin{figure}
+    \includegraphics[scale=0.05]{img/perspective/input.JPG}
+    \caption{Начальное изображение}
+    \label{input}
+\end{figure}
+
+Для начала необходимо удалить текст с изображения. Для этого преобразуем изображение в серый цвет и применим к нему размытие Гаусса \cite{gauss_blur}. На выходе данного этапа имеем изображение, представленное на рисунке ~\ref{gauss_blur}
+
+\begin{figure}
+    \includegraphics[scale=0.25]{img/perspective/blured.png}
+    \caption{Изображение после размытия Гаусса}
+    \label{gauss_blur}
+\end{figure}
+
+Для поиска контуров необходимо выделить ребра. Для этого используется алгоритм Канни \cite{canny}. На выходе имеем изображение, представленное на рисунке ~\ref{canny}
+\begin{figure}
+    \includegraphics[scale=0.25]{img/perspective/canny.png}
+    \caption{Ребра, найденные на изображении}
+    \label{canny}
+\end{figure}
+
+После нахождения ребер поиск контуров осуществляется двумя способами:
+\begin{enumerate}
+    \item С помощью алгоритма $Line Segment Detector$ \cite{lsd}
+    \item С помощью встроенного в $openCV$ алгоритма поиска контуров \cite{opencv_contours}
+\end{enumerate}
+
+Опишем подробнее поиск контуров на основе найденных линий: после прохода алгоритма имеем изображение, представленное на рисунке ~\ref{lsd_img}
+\begin{figure}
+    \includegraphics[scale=0.25]{img/perspective/lsd.png}
+    \caption{Найденные на изображении линии с помощью алгоритма $LSD$}
+    \label{lsd_img}
+\end{figure}
+
+Контур определяется как пересечение горизонтальных и вертикальных линий. На выходе имеем найденные углы контура, показанные на рисунке ~\ref{lsd_corners}
+\begin{figure}
+    \includegraphics[scale=0.25]{img/perspective/corners.png}
+    \caption{Найденные на изображении контуры на основе линий}
+    \label{lsd_corners}
+\end{figure}
+
+С помощью библиотеки $openCV$ контуры находятся следующим образом:
+
+\begin{enumerate}
+    \item Находятся 5 наибольших по площади контуров
+    \item Найденные контуры проверяются на количество углов, минимальную площадь контура
+\end{enumerate}
+
+Среди всех подходящих контуров выбирается наибольший по площади, как показано на рисунке ~\ref{contours}
+\begin{figure}
+    \includegraphics[scale=0.25]{img/perspective/contours.png}
+    \caption{Найденные алгоритмом контуры}
+    \label{contours}
+\end{figure}
+
+
+На основе найденного контура, представляющего лист бумаги, осуществляем коррекцию перспективы. Для этого находим матрицу коррекции \cite{opencv_perspective_transform} и примянем ее к изображению \cite{opencv_warp_perspective}.
+Получаем результирующее изображение, показанное на рисунке ~\ref{perspective_correction}
+\begin{figure}
+    \includegraphics[scale=0.05]{img/perspective/perspective.png}
+    \caption{Изображение с коррекцией перспективы}
+    \label{perspective_correction}
+\end{figure}
+
+Далее необходимо добавить эффект сканирования. Эффект достигается путем применения к композиции небольшого размытия и серого изображения алгоритма сегментации $Adaptive Threshold$ \cite{opencv_threshold}. 
+В конечном итоге имеем результирующее изображение показанное на рисунке ~\ref{preprocess_out}
+
+\begin{figure}
+    \includegraphics[scale=0.05]{img/perspective/output.JPG}
+    \caption{Результирующее изображение}
+    \label{preprocess_out}
+\end{figure}
+
+\subsubsection{Неправильное распознавание}
+Стоит отметить, что данный алгоритм не является универсальным. Например, если на изображении находится посторонний шум (например, палец на бумаге, экран монитора, большое здание в виде прямоугольника), 
+то вероятность получения неверного результата кратно возрастает. Именно с целью защиты от таких случаев в конечном продукте пользователь должен удостовериться в правильности найденного контура и отредактировать границы контура при необходимости.
+Пример входного изображения, дающего неверный результат, и найденные на нем контуры приведены на рисунках ~\ref{perspective_wrong_input} и ~\ref{perspective_wrong_output} соответственно.
+
+\begin{figure}
+    \includegraphics[scale=0.15]{img/perspective/wrong_input.JPG}
+    \caption{Пример неправильно распозного изображения: входное изображение}
+    \label{perspective_wrong_input}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[scale=0.15]{img/perspective/wrong_output.JPG}
+    \caption{Пример неправильно распозного изображения: найденные контуры}
+    \label{perspective_wrong_output}
+\end{figure}
