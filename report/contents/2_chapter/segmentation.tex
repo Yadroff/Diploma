@@ -52,4 +52,40 @@
 
 \subsubsection{Обучение}
 
-Обучение проводилось на платформе $Kaggle$ \cite{kaggle} с логгированием в системе $wandb$ \cite{wandb}
+Обучение проводилось на платформе $Kaggle$ \cite{kaggle} с логгированием в системе $wandb$ \cite{wandb}. В качестве графического процессора использовались две видеокарты $Tesla\;T4$
+После обучения модели мы переходим к оценки ее эффективности. Посмотрим на полученные с помощью $wandb$ графики описанных выше метрик.
+\begin{figure}
+    \includegraphics[scale=0.15]{img/train/train_cls_loss.png}
+    \includegraphics[scale=0.15]{img/train/val_cls_loss.png}
+    \caption{Графики потерь}
+    \label{cls_loss_graph}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[scale=0.15]{img/train/precision.png}
+    \caption{График точности}
+    \label{precision_graph}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[scale=0.15]{img/train/map_50.png}
+    \includegraphics[scale=0.15]{img/train/map50_95.png}
+    \caption{Графики $mAP$}
+    \label{map_graph}
+\end{figure}
+
+На каждом из графиков ~\ref{cls_loss_graph} \dots ~\ref{map_graph} по оси $oX$ отложен номер шага, на котором снимались показатели. Весь этап обучения, состоящий из $N$ эпох равномерно делится на $20$ этапов. На каждом этапе снимаются метрики, попадающие в результирующий график.
+
+После обучения модель была протестирована на тестовых изображениях. На рисунках ~\ref{train_test_1} и ~\ref{train_test_2} показаны результаты тестирования.
+
+\begin{figure}
+    \includegraphics[scale=0.75]{img/train/test_1.png}
+    \caption{Предсказание модели на тестовом изображении}
+    \label{train_test_1}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[scale=0.75]{img/train/test_2.png}
+    \caption{Предсказание модели на тестовом изображении}
+    \label{train_test_2}
+\end{figure}
