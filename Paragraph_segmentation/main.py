@@ -211,10 +211,10 @@ def get_list_of_word_coordinates(corners):
         height = abs(bx[3][1] - bx[0][1])
         if width * height == 0:
             continue
-        plt.plot([bx[0][0],bx[1][0]],[bx[0][1],bx[1][1]],'g-',linewidth=2)
-        plt.plot([bx[1][0],bx[2][0]],[bx[1][1],bx[2][1]],'g-',linewidth=2)
-        plt.plot([bx[2][0],bx[3][0]],[bx[2][1],bx[3][1]],'g-',linewidth=2)
-        plt.plot([bx[3][0],bx[0][0]],[bx[3][1],bx[0][1]],'g-',linewidth=2)
+        plt.plot([bx[0][0], bx[1][0]], [bx[0][1], bx[1][1]], 'g-', linewidth=2)
+        plt.plot([bx[1][0], bx[2][0]], [bx[1][1], bx[2][1]], 'g-', linewidth=2)
+        plt.plot([bx[2][0], bx[3][0]], [bx[2][1], bx[3][1]], 'g-', linewidth=2)
+        plt.plot([bx[3][0], bx[0][0]], [bx[3][1], bx[0][1]], 'g-', linewidth=2)
         newLetter = Letter.Letter([bx[0][0], bx[0][1]], [height, width], counter)
         AllLetters.append(newLetter)
         counter += 1
@@ -229,10 +229,12 @@ def get_y_coordinate_distances(AllLetters):
     for letter in AllLetters:
         prjYCoords.append(letter.getY() + letter.getHeight())
         letter_start_y_coords.append(letter.getY())
-        plt.plot([letter.getX(),letter.getX()+letter.getWidth()],[letter.getY(),letter.getY()],'b-',linewidth=2)
-        plt.plot([letter.getX()+letter.getWidth(),letter.getX()+letter.getWidth()],[letter.getY(),letter.getY()+letter.getHeight()],'b-',linewidth=2)
-        plt.plot([letter.getX()+letter.getWidth(),letter.getX()],[letter.getY()+letter.getHeight(),letter.getY()+letter.getHeight()],'b-',linewidth=2)
-        plt.plot([letter.getX(),letter.getX()],[letter.getY()+letter.getHeight(),letter.getY()],'b-',linewidth=2)
+        plt.plot([letter.getX(), letter.getX() + letter.getWidth()], [letter.getY(), letter.getY()], 'b-', linewidth=2)
+        plt.plot([letter.getX() + letter.getWidth(), letter.getX() + letter.getWidth()],
+                 [letter.getY(), letter.getY() + letter.getHeight()], 'b-', linewidth=2)
+        plt.plot([letter.getX() + letter.getWidth(), letter.getX()],
+                 [letter.getY() + letter.getHeight(), letter.getY() + letter.getHeight()], 'b-', linewidth=2)
+        plt.plot([letter.getX(), letter.getX()], [letter.getY() + letter.getHeight(), letter.getY()], 'b-', linewidth=2)
     '''for c in prjYCoords:
         plt.plot(0, c,'ro')
     plt.show()'''
@@ -292,12 +294,15 @@ def get_ymin(letter_start_y_coords, medPoints, previous_para_start, previous_par
     return ymin
 
 
-def process_image(img):
+def process_image(img, file_name, logs_dir='./logs/'):
+    logs_dir = os.path.join(logs_dir, os.path.splitext(file_name)[0])
+    os.makedirs(os.path.join(logs_dir), exist_ok=True)
     blur = cv2.GaussianBlur(img, (15, 15), 5)
+    cv2.imwrite(os.path.join(logs_dir, 'blur.png'), blur)
     # th3 = cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
     # th3 = cv2.bitwise_not(th3)
     ret3, th3 = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
-    # cv2.imwrite('./thres.png', th3)
+    cv2.imwrite(os.path.join(logs_dir, 'thresh.png'), th3)
 
     corners = get_corners_of_bboxes(th3)
     remove_outliers(img, th3, corners)
@@ -362,7 +367,7 @@ def process_image(img):
 
 def process_file(image_path, output_dir):
     img = cv2.imread(image_path, 0)
-    bboxes = process_image(img)
+    bboxes = process_image(img, os.path.basename(image_path))
     out = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
     for bbox in bboxes:
         cv2.rectangle(out, (bbox["xmin"], bbox["ymin"]), (bbox["xmax"], bbox["ymax"]), (255, 0, 0), 5)
