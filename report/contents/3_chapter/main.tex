@@ -17,10 +17,39 @@
 После выбора изображения, согласно схеме, представленной на рисунке ~\ref{neuro_model}, начинается процесс коррекции перспективы. В случае неудачного изображения может понадобиться коррекция пользователя. В таком случае появляется окно, представленное на рисунке ~\ref{perspective_correction_window}
 
 \begin{figure}
-    \includegraphics[]{img/app/perspective_correction_window.png}
+    \includegraphics[scale=0.75]{img/app/perspective_correction_window.png}
     \caption{Окно пользовательского ввода для коррекции перспективы}
     \label{perspective_correction_window}
 \end{figure}
 
+Дальнейшие этапы работы программы продемонстрируем на отсканированном изображении, представленном на рисунке ~\ref{test_input}
 
-Изображение с коррекцией перспектктивы выводится на экран пользователя, а также отправляется на сервер, где происходит выделение формул. На клиентской машине в это время производится сегментация на абзацы и дальнейшая ее корректировка, как показано на рисунке
+\begin{figure}
+    \includegraphics[scale=0.75]{img/app/input_image.jpg}
+    \caption{Тестовое изображение}
+    \label{test_input}
+\end{figure}
+
+Изображение с коррекцией перспектктивы выводится на экран пользователя, а также отправляется на сервер, где происходит выделение формул. На клиентской машине в это время производится сегментация на абзацы и дальнейшая ее корректировка, как показано на рисунке ~\ref{paragraph_segmentation_window}
+
+\begin{figure}
+    \includegraphics[scale=0.25]{img/app/paragraph_segmentation.png}
+    \caption{Окно для пользовательского редактирования разбиения текста на абзацы}
+    \label{paragraph_segmentation_window}
+\end{figure}
+
+После получения ответа с сервера с координатами найденных формул клиент производит коррекцию формул, как показано на рисунке ~\ref{formula_editor_window}
+
+\begin{figure}
+    \includegraphics[scale=0.25]{img/app/formula_editor_window.png}
+    \caption{Окно для пользовательского редактирования найденных формул}
+    \label{formula_editor_window}
+\end{figure}
+
+После обработки на сервере скорректированных данных происходит генерация \LaTeX\; кода. В частности, для изображения, представленного на рисунках ~\ref{paragraph_segmentation_window} и ~\ref{formula_editor_window} сгенерированный код представлен на рисунке ~\ref{test_listing}
+
+\begin{figure}
+    \lstinputlisting[language={Tex}]{contents/3_chapter/auto_generated.tex}
+    \caption{Листинг изображения, представленного на рисунке ~\ref{test_input}}
+    \label{test_listing}
+\end{figure}
