@@ -2,10 +2,9 @@
 
 Разработав отдельные компоненты продукта, необходимо протестировать ее работоспособность на тестовом изображении.
 
-\subsection{Демонстрация программного продукта}
-Для создания $\textit{Graphical User Interface (GUI)}$ использовался язык $Python$ и библиотека $tkinter$ \cite{tkinter}, а также $matplotlib$ \cite{matplot}.
+Для создания пользовательского интерфейса использовался язык $Python$ и библиотека $tkinter$ \cite{tkinter}, а также $matplotlib$ \cite{matplot}.
 
-При первом входе в приложение будет произведена авторизация путем протокола $\textit{OAuth 2.0}$. На рисунке ~\ref{auth_window} показано окно авторизации через облачное хранилище (в данном случае $Google$)
+При первом входе в приложение будет произведена авторизация путем протокола $\textit{OAuth 2.0}$. На рисунке ~\ref{auth_window} показано окно авторизации через облачное хранилище (в данном случае $Google$).
 
 \begin{figure}
     \includegraphics[scale=0.5]{img/app/oauth_1.png}
@@ -14,7 +13,7 @@
     \label{auth_window}
 \end{figure}
 
-После выбора изображения, согласно схеме, представленной на рисунке ~\ref{neuro_model}, начинается процесс коррекции перспективы. В случае неудачного изображения может понадобиться коррекция пользователя. В таком случае появляется окно, представленное на рисунке ~\ref{perspective_correction_window}
+После выбора изображения, согласно схеме, показанной на рисунке ~\ref{neuro_model}, начинается процесс коррекции перспективы. В случае неудачного изображения может понадобиться коррекция пользователя. В таком случае появляется окно, представленное на рисунке ~\ref{perspective_correction_window}.
 
 \begin{figure}
     \includegraphics[scale=0.75]{img/app/perspective_correction_window.png}
@@ -22,7 +21,7 @@
     \label{perspective_correction_window}
 \end{figure}
 
-Дальнейшие этапы работы программы продемонстрируем на отсканированном изображении, представленном на рисунке ~\ref{test_input}
+Дальнейшие этапы работы программы продемонстрируем на отсканированном изображении, представленном на рисунке ~\ref{test_input}.
 
 \begin{figure}
     \includegraphics[scale=0.75]{img/app/input_image.jpg}
@@ -30,7 +29,7 @@
     \label{test_input}
 \end{figure}
 
-Изображение с коррекцией перспектктивы выводится на экран пользователя, а также отправляется на сервер, где происходит выделение формул. На клиентской машине в это время производится сегментация на абзацы и дальнейшая ее корректировка, как показано на рисунке ~\ref{paragraph_segmentation_window}
+Изображение с коррекцией перспективы выводится на экран пользователя, а также отправляется на сервер, где происходит выделение формул. На клиентской машине в это время производится сегментация на абзацы и дальнейшая ее корректировка, как показано на рисунке ~\ref{paragraph_segmentation_window}.
 
 \begin{figure}
     \includegraphics[scale=0.25]{img/app/paragraph_segmentation.png}
@@ -38,7 +37,7 @@
     \label{paragraph_segmentation_window}
 \end{figure}
 
-После получения ответа с сервера с координатами найденных формул клиент производит коррекцию формул, как показано на рисунке ~\ref{formula_editor_window}
+После получения ответа с сервера с координатами найденных формул клиент производит коррекцию формул, как показано на рисунке ~\ref{formula_editor_window}.
 
 \begin{figure}
     \includegraphics[scale=0.25]{img/app/formula_editor_window.png}
@@ -46,10 +45,49 @@
     \label{formula_editor_window}
 \end{figure}
 
-После обработки на сервере скорректированных данных происходит генерация \LaTeX\; кода. В частности, для изображения, представленного на рисунках ~\ref{paragraph_segmentation_window} и ~\ref{formula_editor_window} сгенерированный код представлен на рисунке ~\ref{test_listing}
+После обработки на сервере скорректированных данных происходит генерация \LaTeX\-кода. В частности, для изображения, представленного на рисунках ~\ref{paragraph_segmentation_window} и ~\ref{formula_editor_window} сгенерированный код представлен на рисунке ~\ref{test_listing}.
 
 \begin{figure}
-    \lstinputlisting[language={Tex}]{contents/3_chapter/auto_generated.tex}
+    \begin{lstlisting}[language={[LaTeX]TeX}]
+        \documentclass{article}
+        \usepackage[T2A]{fontenc} % Кодировка шрифта
+        \usepackage[utf8]{inputenc} % Кодировка ввода
+        \usepackage[english, russian]{babel} % Пакет для поддержки русского языка
+        \usepackage{amsmath} % Для использования математических формул
+            
+        \begin{document}
+        Теория последовательностей
+        
+        Теория последовательностей
+        
+        1. Понятие предела последовательности. Говорят, что последовательность $x_1,x_2,\ldots,x_n, \ldots$ имеет своим пределом число $a$ (короче, сходится к $a$), т.е.
+        
+        \[
+        \lim_{n \to \infty} x_n = a
+        \]
+        
+        если для любого $\epsilon > 0$ существует число $N = N(\varepsilon)$ такое, что
+        
+        $|x_n - a| < \varepsilon$ при $n > N$
+        
+        В частности, $x_n$ называется бесконечно малой, если
+        \[
+        \lim_{n \to \infty} x_n = 0
+        \]
+        
+        Последовательность, не имеющая предела, называется расходящейся.
+            
+        \end{document}
+    \end{lstlisting}
     \caption{Листинг изображения, представленного на рисунке ~\ref{test_input}}
     \label{test_listing}
+\end{figure}
+
+
+Скомпилированный документ представлен на рисунке ~\ref{test_compiled}.
+
+\begin{figure}
+    \includegraphics[scale=0.8]{img/app/generated_doc.jpg}
+    \caption{Скомпилированный документ листинга, показанного на рисунке ~\ref{test_listing}}
+    \label{test_compiled}
 \end{figure}
